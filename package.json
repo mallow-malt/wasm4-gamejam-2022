@@ -1,0 +1,14 @@
+{
+  "name": "wasm4-gamejam-2022",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node watch.js",
+    "build": "asc --target release",
+    "build:debug": "asc --target debug"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.19.12",
+    "chokidar": "^3.5.2",
+    "cross-spawn": "^7.0.3"
+  }
+}
