@@ -1,3 +1,7 @@
 /build
 /sprites/sprites.h
 /sprites/*.png
+/maps/package-lock.json
+/maps/node_modules
+/maps/*.h
+.vscode

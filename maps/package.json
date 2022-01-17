@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "parse": "node parser.js"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0"
+  }
+}

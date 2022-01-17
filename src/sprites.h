@@ -1,11 +1,4 @@
-#include "wasm4.h"
-
-struct Sprite {
-   uint32_t  height;
-   uint32_t  width;
-   uint32_t  flag;
-   uint8_t   sprite[];
-};
+#include "types.h"
 
 struct Sprite FullBlockColorA = { 
     .height = 16,

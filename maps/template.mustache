@@ -1,0 +1,36 @@
+#include "types.h"
+
+struct MapTile {{name}}Tiles[{{tileSize}}] = {
+    {{#tiles}}
+    {
+        .sprite = &{{sprite}},
+        .posX = {{x}},
+        .posY = {{y}},
+        .rotation = {{rotation}}
+    },
+    {{/tiles}}
+};
+
+struct MapTile {{name}}Decals[{{decalSize}}] = {
+    {{#decals}}
+    {
+        .sprite = &{{sprite}},
+        .posX = {{x}},
+        .posY = {{y}},
+        .rotation = {{rotation}}
+    },
+    {{/decals}}
+};
+
+struct Map {{name}} = {
+    .tiles = {{name}}Tiles,
+    .tileSize = {{tileSize}},
+    .decals = {{name}}Decals,
+    .decalSize = {{decalSize}},
+    .startX = {{playerX}},
+    .startY = {{playerY}},
+    .minX = {{minX}},
+    .maxX = {{maxX}},
+    .minY = {{minY}},
+    .maxY = {{maxY}}
+};
