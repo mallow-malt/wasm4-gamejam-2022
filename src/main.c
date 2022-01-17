@@ -1,101 +1,22 @@
 #include "wasm4.h"
 #include <math.h>
-
-#define TILE_MAP_WIDTH 10
-#define TILE_MAP_HEIGHT 10
-
-#define TILE_SIZE 16
-#define PLAYER_SIZE 0.5f
-#define FLY_SPEED 0.03f
-#define MAX_SPEED 0.9f
-
-const char* MapData =
-  ".........."
-  ".........."
-  ".......#.#"
-  "...#...#.#"
-  ".........."
-  "........#."
-  ".........."
-  "........#."
-  ".../......"
-  "####......"
-  ;
-
-struct Vect
-{
-  float x;
-  float y;
-};
-
-struct TileCoord
-{
-  uint8_t x;
-  uint8_t y;
-};
-
-struct Vect playerPos;
-
-struct Vect playerVel;
+#include "collider.h"
 
 uint8_t previousGamepad;
 
-char GetTileState(size_t x, size_t y)
-{
-  if (x < 0 || x >= TILE_MAP_WIDTH || y < 0 || y >= TILE_MAP_HEIGHT)
-    {
-      return ' ';
-    }
-  return MapData[x + y*TILE_MAP_WIDTH];
-}
-
-
-// player
-const uint8_t player[60] = { 0x00,0x05,0x00,0x00,0x00,0x10,0x40,0x00,0x00,0x05,0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x05,0x54,0x00,0x00,0x04,0x05,0x00,0x00,0x04,0x0a,0x80,0x00,0x05,0x02,0x00,0x00,0x09,0x8a,0x00,0x00,0x02,0x68,0x00,0x0a,0x82,0x6a,0x80,0x20,0x2a,0x60,0x20,0x20,0x21,0x20,0x20,0x20,0x24,0x20,0x20,0x0a,0x80,0x0a,0x80 };
-
-
-void DrawTileStates()
-{
-  for (int x = 0; x < TILE_MAP_WIDTH; ++x) {
-    for (int y = 0; y < TILE_MAP_HEIGHT; ++y) {
-      uint8_t drawColors = 0;
-      char tileState = GetTileState(x, y);
-      switch (tileState) {
-      case '.': {
-        drawColors = 1;
-        break;
-      }
-      case '#': {
-        drawColors = 2;
-        break;
-      }
-      case '/': {
-        drawColors = 3;
-        break;
-      }
-      default:
-        drawColors = 4;
-        break;
-      }
-      *DRAW_COLORS = drawColors;
-      rect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-    }
-  }
-}
-
-struct TileCoord MouseTileCoord()
-{
-  struct TileCoord res;
-  res.x = *MOUSE_X/TILE_SIZE;
-  res.x = (res.x > 9) ? 9 : res.x;
-  res.y = *MOUSE_Y/TILE_SIZE;
-  res.y = (res.y > 9) ? 9 : res.y;
-  return res;
-}
+struct polygon triangle;
+struct polygon triangle2;
 
 void start () {
-  playerPos.x = 4;
-  playerPos.y = 4;
+  triangle = makeTriangle();
+  triangle.pos.x = 30;
+  triangle.pos.y = 30;
+  triangle.scale = 20;
+  
+  triangle2 = makeTriangle();
+  triangle2.pos.x = 70;
+  triangle2.pos.y = 70;
+  triangle2.scale = 20;
 }
 
 
@@ -105,120 +26,46 @@ void update () {
   uint8_t pressedThisFrame = gamepad & (gamepad ^ previousGamepad);
   previousGamepad = gamepad;
 
-  
-  // Jump
-  if (pressedThisFrame & BUTTON_1) {
-    playerVel.y += -0.5f;
-  }
 
-
-  // Gravity
-  playerVel.y += 0.03f;
-  
-
-
-  // Clamp velocities
-  if (playerVel.x > MAX_SPEED)
-    playerVel.x = MAX_SPEED;
-
-  if (playerVel.x < -MAX_SPEED)
-    playerVel.x = -MAX_SPEED;
-
-  if (playerVel.y > MAX_SPEED)
-    playerVel.y = MAX_SPEED;
-
-  if (playerVel.y < -MAX_SPEED)
-    playerVel.y = -MAX_SPEED;
-  
-
-  // Calc next position
-  float newPlayerX = playerPos.x + playerVel.x;
-  float newPlayerY = playerPos.y + playerVel.y;
-
-
-  // Fly Controls
   if (gamepad & BUTTON_LEFT)
     {
-      newPlayerX += -FLY_SPEED;
+      triangle.angle += -0.05f;
     }
   if (gamepad & BUTTON_RIGHT)
     {
-      newPlayerX += FLY_SPEED;
-    }
-  if (gamepad & BUTTON_DOWN)
-    {
-      newPlayerY += FLY_SPEED;
+      triangle.angle += 0.05f;
     }
   if (gamepad & BUTTON_UP)
     {
-      newPlayerY += -FLY_SPEED;
+      triangle.pos.x += cosf(triangle.angle) * 0.5f;
+      triangle.pos.y += sinf(triangle.angle) * 0.5f;
+    }
+  if (gamepad & BUTTON_DOWN)
+    {
+      triangle.pos.x += cosf(triangle.angle) * -0.5f;
+      triangle.pos.y += sinf(triangle.angle) * -0.5f;
     }
 
   
-  
-  // Collisions
-  if (newPlayerX - playerPos.x < 0) // going left
-    {
-      char topLeftState = GetTileState(newPlayerX, playerPos.y);
-      char bottomLeftState = GetTileState(newPlayerX, playerPos.y + (0.9f * PLAYER_SIZE));
-      /* tracef("npx: %f  bl: %c  tl: %c", newPlayerX, bottomLeftState, topLeftState); */
-      if (bottomLeftState != '.' || topLeftState != '.')
-        {
-          newPlayerX = (int)newPlayerX + 1;
-          playerVel.x = 0;
-        }
-    }
 
-  if (newPlayerX - playerPos.x > 0) // going right
-    {
-      char topRightState = GetTileState(newPlayerX + PLAYER_SIZE, playerPos.y);
-      char bottomRightState = GetTileState(newPlayerX + PLAYER_SIZE, playerPos.y + (0.9f * PLAYER_SIZE));
-      if (bottomRightState != '.' || topRightState != '.')
-        {
-          newPlayerX = (int)newPlayerX + (1.0f - PLAYER_SIZE);
-          playerVel.x = 0;
-        }
-    }
+  drawPolygon(triangle);
 
-  if (newPlayerY - playerPos.y < 0) // going up
-    {
-      char topLeftState = GetTileState(newPlayerX, newPlayerY);
-      char topRightState = GetTileState(newPlayerX + (0.9f * PLAYER_SIZE), newPlayerY);
-      if (topLeftState != '.' || topRightState != '.')
-        {
-          newPlayerY = (int)newPlayerY + 1;
-          playerVel.y = 0;
-        }
-    }
+  drawPolygon(triangle2);
 
-  if (newPlayerY - playerPos.y > 0) // going down
-    {
-      char bottomLeftState = GetTileState(newPlayerX, newPlayerY + PLAYER_SIZE);
-      char bottomRightState = GetTileState(newPlayerX + (0.9f * PLAYER_SIZE), newPlayerY + PLAYER_SIZE);
-      if (bottomLeftState != '.' || bottomRightState != '.')
-        {
-          newPlayerY = (int)newPlayerY + (1.0f - PLAYER_SIZE);
-          playerVel.y = 0;
-          // on ground
-        }
-    }
+  /* tracef("collide: %s", overlapP(triangle2, triangle) ? "true" : "false"); */
+
+  collide(&triangle, &triangle2);
 
 
-  // Apply new position
-  playerPos.x = newPlayerX;
-  playerPos.y = newPlayerY;
+  /* struct vec l1_start = {110, 120}; */
+  /* struct vec l1_end = {130, 140}; */
+  /* struct vec l2_start = {110, 130}; */
+  /* struct vec l2_end = {110, 50}; */
 
+  /* line(l1_start.x, l1_start.y, l1_end.x, l1_end.y); */
+  /* line(l2_start.x, l2_start.y, l2_end.x, l2_end.y); */
 
-  
-  // Draw tiles
-  DrawTileStates();
+  /* struct vec res = findIntersect(l1_start, l1_end, l2_start, l2_end); */
 
-  // Draw player
-  *DRAW_COLORS = 0x32;
-  uint16_t playerPixelSize = PLAYER_SIZE*TILE_SIZE;
-  rect(playerPos.x*TILE_SIZE, playerPos.y*TILE_SIZE, playerPixelSize, playerPixelSize);
-
-  // Draw mouse
-  *DRAW_COLORS = 4;
-  rect(*MOUSE_X, *MOUSE_Y, 4, 4);
+  /* tracef("res: %f %f", res.x, res.y); */
 }
