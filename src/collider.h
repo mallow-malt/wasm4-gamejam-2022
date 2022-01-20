@@ -16,6 +16,7 @@ struct polygon
   struct vec pos;
   float angle;
   float scale;
+  struct vec center;
 };
 
 

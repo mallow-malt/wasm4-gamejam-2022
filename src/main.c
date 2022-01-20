@@ -8,7 +8,7 @@ struct polygon triangle;
 struct polygon triangle2;
 
 void start () {
-  triangle = makeTriangle();
+  triangle = makeSquare();
   triangle.pos.x = 30;
   triangle.pos.y = 30;
   triangle.scale = 20;
@@ -29,23 +29,36 @@ void update () {
 
   if (gamepad & BUTTON_LEFT)
     {
-      triangle.angle += -0.05f;
+      // triangle.angle += -0.05f;
+      triangle.pos.x -= 0.5f;
     }
   if (gamepad & BUTTON_RIGHT)
     {
-      triangle.angle += 0.05f;
+      // triangle.angle += 0.05f;
+      triangle.pos.x += 0.5f;
     }
   if (gamepad & BUTTON_UP)
     {
-      triangle.pos.x += cosf(triangle.angle) * 0.5f;
-      triangle.pos.y += sinf(triangle.angle) * 0.5f;
+      /* triangle.pos.x += cosf(triangle.angle) * 0.5f; */
+      /* triangle.pos.y += sinf(triangle.angle) * 0.5f; */
+      triangle.pos.y -= 0.5f;
     }
   if (gamepad & BUTTON_DOWN)
     {
-      triangle.pos.x += cosf(triangle.angle) * -0.5f;
-      triangle.pos.y += sinf(triangle.angle) * -0.5f;
+      /* triangle.pos.x += cosf(triangle.angle) * -0.5f; */
+      /* triangle.pos.y += sinf(triangle.angle) * -0.5f; */
+      triangle.pos.y += 0.5f;
     }
 
+
+  if (overlapP(triangle, triangle2))
+    {
+      *DRAW_COLORS = 0x42;
+    }
+  else
+    {
+      *DRAW_COLORS = 0x43;
+    }
   
 
   drawPolygon(triangle);
@@ -56,6 +69,10 @@ void update () {
 
   collide(&triangle, &triangle2);
 
+
+  /* line(70, 70, 90, 70); */
+  /* line(83, 63, 53, 80); */
+ 
 
   /* struct vec l1_start = {110, 120}; */
   /* struct vec l1_end = {130, 140}; */
