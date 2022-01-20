@@ -18,8 +18,11 @@ uint8_t previousGamepad;
 signed short camX = 0;
 signed short camY = 0;
 unsigned char speed = 1;
+unsigned short camXDeadZone = 50;
+unsigned short camYDeadZone = 50;
 
 struct polygon triangle;
+struct polygon triangle2;
 
 void start () {
   PALETTE[0] = 0x000000;
@@ -31,6 +34,11 @@ void start () {
   triangle.pos.x = 30;
   triangle.pos.y = 30;
   triangle.scale = 20;
+  
+  triangle2 = makeSquare();
+  triangle2.pos.x = 70;
+  triangle2.pos.y = 70;
+  triangle2.scale = 20;
 }
 
 
@@ -60,7 +68,6 @@ void update () {
 //         camY = clampSS(camY + speed, LevelOne.minY, LevelOne.maxY);
 //     }
 
-
   if (gamepad & BUTTON_LEFT)
     {
       triangle.angle += -0.05f;
@@ -81,8 +88,9 @@ void update () {
     }
 
   
-  *DRAW_COLORS = 0x1203;
-  drawPolygon(triangle);
+  // drawPolygon(triangle2);
+
+  // collide(&triangle, &triangle2);
 
   *DRAW_COLORS = 0x4321;
 
@@ -93,4 +101,7 @@ void update () {
   for (int i = 0; i < LevelOne.decalSize; i++) {
     blit(LevelOne.decals[i].sprite->sprite, LevelOne.decals[i].posX - camX, LevelOne.decals[i].posY - camY, 16, 16, LevelOne.decals[i].rotation);
   }
+
+  *DRAW_COLORS = 0x1203;
+  drawPolygon(triangle);
 }

@@ -21,7 +21,9 @@ struct polygon
 
 extern struct vec trianglePoints[];
 
+struct polygon makePolygon();
 struct polygon makeTriangle();
+struct polygon makeSquare();
 void drawPolygon(struct polygon p);
 struct vec findIntersect(struct vec l1_start, struct vec l1_end, struct vec l2_start, struct vec l2_end);
 bool overlapP(struct polygon poly1, struct polygon poly2);

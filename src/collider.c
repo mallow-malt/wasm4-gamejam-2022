@@ -10,15 +10,32 @@ struct vec trianglePoints[] = {
   {-0.5f, -0.866025f}
 };
 
-struct polygon makeTriangle()
+struct vec squarePoints[] = {
+  {1.0f, 0.0f},
+  {1.0f, 1.0f},
+  {0.0f, 1.0f},
+  {0.0f, 0.0f},
+};
+
+struct polygon makePolygon(struct vec* points, size_t length)
 {
   struct vec emptyPos = { 0.0f, 0.0f };
   struct polygon res;
-  res.points = trianglePoints;
-  res.length = sizeof(trianglePoints)/sizeof(trianglePoints[0]);
+  res.points = points;
+  res.length = length;
   res.pos = emptyPos;
   res.angle = 0.0f;
   return res;
+}
+
+struct polygon makeTriangle()
+{
+  return makePolygon(trianglePoints, sizeof(trianglePoints)/sizeof(trianglePoints[0]));
+}
+
+struct polygon makeSquare()
+{
+  return makePolygon(squarePoints, sizeof(squarePoints)/sizeof(squarePoints[0]));
 }
 
 struct vec applyTransform(struct vec pnt, float scale, float angle, struct vec offset)
