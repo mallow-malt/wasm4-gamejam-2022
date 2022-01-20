@@ -61,6 +61,35 @@ void update () {
       triangle.pos.y += sinf(triangle.angle) * -0.5f;
     }
 
+  signed short oldVal = 0;
+  if (triangle.pos.x < 80 - camXDeadZone) {
+    // Move Cam Left
+    oldVal = camX;
+    camX = clampSS(camX - (80 - camXDeadZone - triangle.pos.x), LevelOne.minX, LevelOne.maxX);
+    if (oldVal != camX)
+      triangle.pos.x = 80 - camXDeadZone;
+  } else if (triangle.pos.x > 80 + camXDeadZone) {
+    // Move Cam Right
+    oldVal = camX;
+    camX = clampSS(camX + (triangle.pos.x - (80 + camXDeadZone)), LevelOne.minX, LevelOne.maxX);
+    if (oldVal != camX)
+      triangle.pos.x = camXDeadZone + 80;
+  }
+
+  if (triangle.pos.y < 80 - camYDeadZone) {
+    // Move Cam Up
+    oldVal = camY;
+    camY = clampSS(camY - (80 - camYDeadZone - triangle.pos.y), LevelOne.minY, LevelOne.maxY);
+    if (oldVal != camY)
+      triangle.pos.y = 80 - camYDeadZone;
+  } else if (triangle.pos.y > 80 + camYDeadZone) {
+    // Move Cam Down
+    oldVal = camY;
+    camY = clampSS(camY + (triangle.pos.y - (80 + camYDeadZone)), LevelOne.minY, LevelOne.maxY);
+    if (oldVal != camY)
+      triangle.pos.y = camYDeadZone + 80;
+  }
+
   *DRAW_COLORS = 0x4321;
 
   for (int i = 0; i < LevelOne.tileSize; i++) {
