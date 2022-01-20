@@ -13,7 +13,7 @@ void start () {
   triangle.pos.y = 30;
   triangle.scale = 20;
   
-  triangle2 = makeTriangle();
+  triangle2 = makeSquare();
   triangle2.pos.x = 70;
   triangle2.pos.y = 70;
   triangle2.scale = 20;
