@@ -22,7 +22,6 @@ unsigned short camXDeadZone = 50;
 unsigned short camYDeadZone = 50;
 
 struct polygon triangle;
-struct polygon triangle2;
 
 void start () {
   PALETTE[0] = 0x000000;
@@ -34,11 +33,6 @@ void start () {
   triangle.pos.x = 30;
   triangle.pos.y = 30;
   triangle.scale = 20;
-  
-  triangle2 = makeSquare();
-  triangle2.pos.x = 70;
-  triangle2.pos.y = 70;
-  triangle2.scale = 20;
 }
 
 
@@ -47,26 +41,6 @@ void update () {
   uint8_t gamepad = *GAMEPAD1;
   uint8_t pressedThisFrame = gamepad & (gamepad ^ previousGamepad);
   previousGamepad = gamepad;
-
-//  if (pressedThisFrame & BUTTON_1) {
-//         trace("Increase speed");
-//         speed = clampUC(speed + 1, 1, 16);
-//     } else if (pressedThisFrame & BUTTON_2) {
-//         trace("Decrease speed");
-//         speed = clampUC(speed - 1, 1, 16);
-//     } else if (pressedThisFrame & BUTTON_LEFT) {
-//         trace("Move left");
-//         camX = clampSS(camX - speed, LevelOne.minX, LevelOne.maxX);
-//     } else if (pressedThisFrame & BUTTON_RIGHT) {
-//         trace("Move right");
-//         camX = clampSS(camX + speed, LevelOne.minX, LevelOne.maxX);
-//     } else if (pressedThisFrame & BUTTON_UP) {
-//         trace("Move up");
-//         camY = clampSS(camY - speed, LevelOne.minY, LevelOne.maxY);
-//     } else if (pressedThisFrame & BUTTON_DOWN) {
-//         trace("Move down");
-//         camY = clampSS(camY + speed, LevelOne.minY, LevelOne.maxY);
-//     }
 
   if (gamepad & BUTTON_LEFT)
     {
@@ -87,14 +61,14 @@ void update () {
       triangle.pos.y += sinf(triangle.angle) * -0.5f;
     }
 
-  
-  // drawPolygon(triangle2);
-
-  // collide(&triangle, &triangle2);
-
   *DRAW_COLORS = 0x4321;
 
   for (int i = 0; i < LevelOne.tileSize; i++) {
+    struct polygon collider = makeSquare();
+    collider.pos.x = LevelOne.tiles[i].posX - camX;
+    collider.pos.y = LevelOne.tiles[i].posY - camY;
+    collider.scale = 16;
+    collide(&triangle, &collider);
     blit(LevelOne.tiles[i].sprite->sprite, LevelOne.tiles[i].posX - camX, LevelOne.tiles[i].posY - camY, 16, 16, LevelOne.tiles[i].rotation);
   }
 
