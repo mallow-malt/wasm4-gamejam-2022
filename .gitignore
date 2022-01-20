@@ -5,3 +5,4 @@
 /maps/node_modules
 /maps/*.h
 .vscode
+*~
