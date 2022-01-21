@@ -3,6 +3,12 @@
 #include "collider.h"
 #include <math.h>
 
+struct vec linePoints[] = {
+  {0.0f, 0.0f},
+  {1.0f, 0.0f}
+};
+
+struct vec lineCenter = { 0.5f, 0.0f };
 
 struct vec trianglePoints[] = {
   {1.0f, 0.0f},
@@ -38,6 +44,11 @@ struct polygon makePolygon(struct vec* points, size_t length, struct vec center)
   res.angle = 0.0f;
   res.center = center;
   return res;
+}
+
+struct polygon makeLine()
+{
+  return makePolygon(linePoints, sizeof(linePoints)/sizeof(linePoints[0]), lineCenter);
 }
 
 struct polygon makeTriangle()
