@@ -2,6 +2,7 @@
 #define COLLIDER_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 struct vec
 {
