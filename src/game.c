@@ -5,9 +5,9 @@
 #include "LevelOne.h"
 #include "utils.h"
 #include "game.h"
+#include "gamepad.h"
 
 
-uint8_t previousGamepad;
 signed short camX = 0;
 signed short camY = 0;
 unsigned char speed = 1;
@@ -59,9 +59,9 @@ void game_start () {
 
 void game_update () {
   // Gamepad
-  uint8_t gamepad = *GAMEPAD1;
-  uint8_t pressedThisFrame = gamepad & (gamepad ^ previousGamepad);
-  previousGamepad = gamepad;
+  gamepad_update();
+  uint8_t pressedThisFrame = gamepad_getPressedThisFrame();
+  uint8_t gamepad = gamepad_getPressed();
 
   if (gamepad & BUTTON_LEFT)
     {

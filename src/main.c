@@ -1,13 +1,16 @@
 #include "wasm4.h"
-#include "game.h"
-#include "colliderdemo.h"
+/* #include "game.h" */
+/* #include "colliderdemo.h" */
+#include "tilecollider_demo.h"
 
 void start () {
-  colliderdemo_start();
+  tcdemo_start();
+  /* colliderdemo_start(); */
   /* game_start(); */
 }
 
 void update () {
-  colliderdemo_update();
+  tcdemo_update();
+  /* colliderdemo_update(); */
   /* game_update(); */
 }
