@@ -1,6 +1,7 @@
 #include "music.h"
 #include "song.h"
 #include "wasm4.h"
+#include <stdbool.h>
 
 int currentPattern = 0;
 int patternProgress = 0;

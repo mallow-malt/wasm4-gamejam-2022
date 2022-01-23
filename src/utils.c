@@ -15,3 +15,16 @@ float clampF(float x, float min, float max) {
   return t > max ? max : t;
 }
 
+unsigned int clampUI(unsigned int x, unsigned int min, unsigned int max) {
+  unsigned int t = x < min ? min : x;
+  return t > max ? max : t;
+}
+
+const char* intToString(int v, char* str) {
+  str[0] = v / 100 + 48;
+  str[1] = v % 100 / 10 + 48;
+  str[2] = v % 10 + 48;
+  str[3] = '\0';
+  return str;
+}
+

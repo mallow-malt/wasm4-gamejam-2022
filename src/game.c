@@ -33,6 +33,10 @@ unsigned char framesSinceSpin = 0;
 unsigned char framesSinceGift = 0;
 bool giftUp = true;
 
+uint8_t frameCounter = 0;
+unsigned int timeCounter = 0;
+unsigned int giftCounter = 0;
+
 // Is the block of this state solid?
 bool solidp(char state)
 {
@@ -299,5 +303,19 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
   //      (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y,
   //      currentPlayerWidth*LevelOneCollisionMap.tileWidth,
   //      currentPlayerHeight*LevelOneCollisionMap.tileHeight);
+  char str[3];
+  *DRAW_COLORS = 0x4321;
+  text(intToString(giftCounter, str), 136, 0);
+
+  if (frameCounter == 60) {
+    frameCounter = 0;
+    timeCounter = clampUI(timeCounter + 1, 0, 999);
+  } else
+    frameCounter++;
+
+  if (timeCounter > 700)
+    *DRAW_COLORS = 0x32;
+  text(intToString(timeCounter, str), 0, 0);
+
   return 1;
 }
