@@ -302,18 +302,18 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
   // Calculate Camera Position
   if (playerPos.x *LevelOneCollisionMap.tileWidth < camPos.x + 80 - camXDeadZone) {
     // shift camera left
-    camPos.x = clampF(camPos.x - (camPos.x + 80 - camXDeadZone - playerPos.x * LevelOneCollisionMap.tileWidth), 0, 160);
+    camPos.x = clampF(camPos.x - (camPos.x + 80 - camXDeadZone - playerPos.x * LevelOneCollisionMap.tileWidth), 0, LevelOneCamMax.x);
   } else if (playerPos.x *LevelOneCollisionMap.tileWidth > camPos.x + 80 + camXDeadZone) {
     // shift camera right
-    camPos.x = clampF(camPos.x + (playerPos.x *LevelOneCollisionMap.tileWidth - (camPos.x + 80 + camXDeadZone)), 0, 160);
+    camPos.x = clampF(camPos.x + (playerPos.x *LevelOneCollisionMap.tileWidth - (camPos.x + 80 + camXDeadZone)), 0, LevelOneCamMax.x);
   }
 
   if (playerPos.y *LevelOneCollisionMap.tileHeight < camPos.y + 80 - camYDeadZone) {
     // shift camera up
-    camPos.y = clampF(camPos.y - (camPos.y + 80 - camYDeadZone - playerPos.y *LevelOneCollisionMap.tileHeight), 0, 160);
+    camPos.y = clampF(camPos.y - (camPos.y + 80 - camYDeadZone - playerPos.y *LevelOneCollisionMap.tileHeight), 0, LevelOneCamMax.y);
   } else if (playerPos.y *LevelOneCollisionMap.tileHeight > camPos.y + 80 + camYDeadZone) {
     // shift camera down
-    camPos.y = clampF(camPos.y + (playerPos.y *LevelOneCollisionMap.tileHeight - (camPos.y + 80 + camYDeadZone)), 0, 160);
+    camPos.y = clampF(camPos.y + (playerPos.y *LevelOneCollisionMap.tileHeight - (camPos.y + 80 + camYDeadZone)), 0, LevelOneCamMax.y);
   } 
 
   // Draw tiles

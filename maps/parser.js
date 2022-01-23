@@ -34,6 +34,8 @@ fs.readFile('./maps.ldtk', 'utf8', (_, rawData) => {
             camY: cameraPos[1],
             playerX: playerPos[0] / tilesLayer.__gridSize,
             playerY: playerPos[1] / tilesLayer.__gridSize,
+            maxCamX: level.pxWid - 160,
+            maxCamY: level.pxHei - 160,
             width: tilesLayer.__cWid,
             height: tilesLayer.__cHei,
             tileSize: tilesLayer.__gridSize,
