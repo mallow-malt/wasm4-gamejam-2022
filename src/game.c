@@ -15,7 +15,7 @@
 #define PLAYER_TILTED_WIDTH 15.0f/16.0f
 #define PLAYER_TILTED_HEIGHT 15.0f/16.0f
 #define PEDDLE_SPEED 0.002f
-#define AIR_SPEED 0.02f
+#define AIR_SPEED 0.001f
 
 unsigned short camXDeadZone = 50;
 unsigned short camYDeadZone = 50;
@@ -39,8 +39,20 @@ void drawTileStates()
         drawColors = 2;
         break;
       }
-      case '/': {
-        drawColors = 3;
+      case '^': {
+        drawColors = 0x13;
+        break;
+      }
+      case '>': {
+        drawColors = 0x34;
+        break;
+      }
+      case 'v': {
+        drawColors = 0x23;
+        break;
+      }
+      case '<': {
+        drawColors = 0x43;
         break;
       }
       default:
@@ -237,10 +249,10 @@ void game_update()
   // Get grounded status
   bool grounded =
     tc_getState(LevelOneCollisionMap,
-                playerPos.x,
+                playerPos.x + (1.0f/16.0f),
                 playerPos.y + currentPlayerHeight + (1.0f/16.0f)) == '#' ||
     tc_getState(LevelOneCollisionMap,
-                playerPos.x + currentPlayerWidth,
+                playerPos.x + currentPlayerWidth - (1.0f/16.0f),
                 playerPos.y + currentPlayerHeight + (1.0f/16.0f)) == '#';
 
 
@@ -254,6 +266,20 @@ void game_update()
 
 
 
+  // Air control
+  if (!grounded)
+    {
+      if (gamepad & BUTTON_LEFT) // left
+        {
+          playerVel.x -= AIR_SPEED;
+        }
+      else if (gamepad & BUTTON_RIGHT) // right
+        {
+          playerVel.x += AIR_SPEED;
+        }
+    }
+
+  
   // Peddling
   if (grounded)
     {
@@ -279,34 +305,19 @@ void game_update()
 
 
   
-  // Air control
-  if (!grounded)
-    {
-      if (gamepad & BUTTON_LEFT) // left
-        {
-          playerPos.x -= AIR_SPEED;
-        }
-      else if (gamepad & BUTTON_RIGHT) // right
-        {
-          playerPos.x += AIR_SPEED;
-        }
-    }
-
-  
 
   // Calc next position
   float newPlayerX = playerPos.x + playerVel.x;
   float newPlayerY = playerPos.y + playerVel.y;
 
 
-  
 
-  // Collisions
+  // Hard collisions
   if (newPlayerX - playerPos.x < 0) // going left
   {
     char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y);
     char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y + (0.9f * currentPlayerHeight));
-    if (bottomLeftState != '.' || topLeftState != '.')
+    if (bottomLeftState == '#' || topLeftState == '#')
       {
         newPlayerX = (int)newPlayerX + 1;
         playerVel.x = 0;
@@ -317,7 +328,7 @@ void game_update()
   {
     char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y);
     char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y + (0.9f * currentPlayerHeight));
-    if (bottomRightState != '.' || topRightState != '.')
+    if (bottomRightState == '#' || topRightState == '#')
       {
         newPlayerX = (int)newPlayerX + (1.0f - currentPlayerWidth);
         playerVel.x = 0;
@@ -328,7 +339,13 @@ void game_update()
   {
     char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY);
     char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * currentPlayerWidth), newPlayerY);
-    if (topLeftState != '.' || topRightState != '.')
+
+
+    if (topLeftState == 'v' || topRightState == 'v')
+      {
+        playerVel.y += 0.6f;
+      }
+    else if (topLeftState == '#' || topRightState == '#')
       {
         newPlayerY = (int)newPlayerY + 1;
         playerVel.y = 0;
@@ -339,7 +356,22 @@ void game_update()
   {
     char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY + currentPlayerHeight);
     char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * currentPlayerWidth), newPlayerY + currentPlayerHeight);
-    if (bottomLeftState != '.' || bottomRightState != '.')
+
+    if (bottomLeftState == '^' || bottomRightState == '^')
+      {
+        playerVel.y -= 1.2f;
+      }
+    else if (bottomLeftState == '<' || bottomRightState == '<')
+      {
+            playerVel.y -= 0.6f;
+            playerVel.x -= 0.6f;
+      }
+    else if (bottomLeftState == '>' || bottomRightState == '>')
+      {
+            playerVel.y -= 0.6f;
+            playerVel.x += 0.6f;
+      }
+    else if (bottomLeftState == '#' || bottomRightState == '#')
       {
         newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = 0;
@@ -347,6 +379,7 @@ void game_update()
       }
   }
 
+  
 
   // Apply new position
   playerPos.x = newPlayerX;
