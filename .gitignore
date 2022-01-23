@@ -6,3 +6,4 @@
 /maps/*.h
 .vscode
 *~
+node_modules
