@@ -4,7 +4,6 @@
 #include "sprites.h"
 #include "levels.h"
 #include "utils.h"
-#include "gamepad.h"
 #include "tilecollider.h"
 #include <stdbool.h>
 
@@ -72,14 +71,8 @@ void game_start () {
   camPos = LevelOneCamStart;
 }
 
-void game_update()
+uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
 {
-  // Gamepad
-  gamepad_update();
-  uint8_t pressedThisFrame = gamepad_getPressedThisFrame();
-  uint8_t gamepad = gamepad_getPressed();
-
-
   // Gravity
   playerVel.y += 0.03f;
   
@@ -295,4 +288,5 @@ void game_update()
   //      (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y,
   //      currentPlayerWidth*LevelOneCollisionMap.tileWidth,
   //      currentPlayerHeight*LevelOneCollisionMap.tileHeight);
+  return 1;
 }
