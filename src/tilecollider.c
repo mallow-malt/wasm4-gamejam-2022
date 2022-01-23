@@ -1,6 +1,6 @@
 #include "tilecollider.h"
 #include "wasm4.h"
-#include "collider.h"
+#include "types.h"
 
 
 char tc_getState(struct tc_context context, size_t x, size_t y)

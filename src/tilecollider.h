@@ -2,30 +2,7 @@
 #define TILECOLLIDER_H
 
 #include <stdlib.h>
-#include "collider.h"
-
-struct tc_context
-{
-  char* map;
-  size_t width;
-  size_t height;
-  int tileWidth;
-  int tileHeight;
-};
-
-struct rect
-{
-  int32_t x;
-  int32_t y;
-  uint32_t width;
-  uint32_t height;
-};
-
-struct tc_coord
-{
-  uint8_t x;
-  uint8_t y;
-};
+#include "types.h"
 
 #define TC_NULLSTATE ' '
 

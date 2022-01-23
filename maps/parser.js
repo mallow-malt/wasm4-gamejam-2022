@@ -29,9 +29,18 @@ fs.readFile('./maps.ldtk', 'utf8', (_, rawData) => {
         let decals = level.layerInstances.find(layer => layer.__identifier == "Decals").gridTiles.map(tile => {
             return parseTile(tile, ["FullBlockColorA", "HalfBlockColorA"], xOffset, yOffset)
         })
-        let tiles = level.layerInstances.find(layer => layer.__identifier == "Tiles").gridTiles.map(tile => {
+        let tilesLayer = level.layerInstances.find(layer => layer.__identifier == "Tiles")
+        let tiles = tilesLayer.gridTiles.map(tile => {
             return parseTile(tile, ["FullBlockColorA", "HalfBlockColorA"], xOffset, yOffset)
         })
+        let map = ".".repeat(tilesLayer.__cWid * tilesLayer.__cHei).split('')
+        tilesLayer.gridTiles.forEach(tile => {
+            let [tileX, tileY] = tile.px
+            tileX /= 16
+            tileY /= 16
+            map[tileY * tilesLayer.__cWid + tileX] = "#"
+        })
+        const splitter = new RegExp(`.{1,${tilesLayer.__cWid}}`, "g")
         let data = {
             name: level.identifier,
             decals,
@@ -43,7 +52,13 @@ fs.readFile('./maps.ldtk', 'utf8', (_, rawData) => {
             minX: -xOffset,
             maxX: level.pxWid - xOffset - 160,
             minY: -yOffset,
-            maxY: level.pxHei - yOffset - 160
+            maxY: level.pxHei - yOffset - 160,
+            collisionData: {
+                width: tilesLayer.__cWid,
+                height: tilesLayer.__cHei,
+                tileSize: tilesLayer.__gridSize,
+                map: map.join('').match(splitter)
+            }
         }
         fs.readFile('./template.mustache', 'utf8', (_, template) => {
             fs.writeFile(`${data.name}.h`, Mustache.render(template, data), _ => {

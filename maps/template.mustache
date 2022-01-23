@@ -1,5 +1,15 @@
 #include "types.h"
 
+const struct tc_context {{name}}CollisionMap = {
+  .map =
+{{#collisionData.map}}    "{{.}}"
+{{/collisionData.map}},
+  .width = {{collisionData.width}},
+  .height = {{collisionData.height}},
+  .tileWidth = {{collisionData.tileSize}},
+  .tileHeight = {{collisionData.tileSize}}
+};
+
 struct MapTile {{name}}Tiles[{{tileSize}}] = {
     {{#tiles}}
     {
