@@ -1,18 +1,6 @@
 #include "wasm4.h"
 
-struct Sprite {
-   uint32_t  height;
-   uint32_t  width;
-   uint32_t  flag;
-   uint8_t   sprite[];
-};
-
 {{#sprites}}
-struct Sprite {{name}} = { 
-    .height = {{height}},
-    .width = {{width}},
-    .flag = {{flagsHumanReadable}},
-    .sprite = { {{bytes}} }
-};
+uint8_t {{name}}[] = { {{bytes}} };
 
 {{/sprites}}

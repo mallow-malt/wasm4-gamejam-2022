@@ -41,19 +41,19 @@ void drawTileStates()
       char tileState = tc_getState(LevelOneCollisionMap, x, y);
       struct rect rct = tc_getRect(LevelOneCollisionMap, (struct tc_coord){ x, y });
       switch (tileState) {
-        case '#': blit(Block.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        case '#': blit(Block, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
           break;
-        case '^': blit(VerticalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        case '^': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
           break;
-        case '>': blit(HorizontalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        case '>': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
           break;
-        case 'v': blit(VerticalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_Y);
+        case 'v': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_Y);
           break;
-        case '<': blit(HorizontalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_X);
+        case '<': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_X);
           break;
-        case 'G': blit(Gift.sprite, rct.x - camPos.x, rct.y - camPos.y + (giftUp ? 0 : 2), 16, 16, BLIT_2BPP);
+        case 'G': blit(Gift, rct.x - camPos.x, rct.y - camPos.y + (giftUp ? 0 : 2), 16, 16, BLIT_2BPP);
           break;
-        case 'W': blit(Mailbox.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        case 'W': blit(Mailbox, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
           break;
       }
     }
@@ -286,9 +286,9 @@ void game_update()
     framesSinceSpin++;
 
   if (grounded) {
-    blit(wheelsRotated ? PlayerFlatA.sprite : PlayerFlatB.sprite, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x - (facingRight ? 1 : 2), (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
+    blit(wheelsRotated ? PlayerFlatA : PlayerFlatB, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x - (facingRight ? 1 : 2), (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
   } else {
-    blit(wheelsRotated ? PlayerTiltA.sprite : PlayerTiltB.sprite, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x, (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
+    blit(wheelsRotated ? PlayerTiltA : PlayerTiltB, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x, (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
   }
   // *DRAW_COLORS = 0x30;
   // rect((playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x,
