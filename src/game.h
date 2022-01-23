@@ -3,6 +3,6 @@
 
 void game_start();
 
-void game_update();
+uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad);
 
 #endif /* GAME_H */
