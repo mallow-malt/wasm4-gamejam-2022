@@ -1,6 +1,7 @@
 #include "wasm4.h"
 #include "cgsprites.h"
 #include "types.h"
+#include "soundfx.h"
 
 uint8_t openingState = 0; // TODO put back to 0
 
@@ -72,6 +73,7 @@ uint8_t flameState = 0;
 uint8_t textState = 0;
 
 uint8_t play_opening(uint8_t pressedThisFrame) {
+  sfx_update();
     switch (openingState)
     {
         case 0:
@@ -124,7 +126,11 @@ uint8_t play_opening(uint8_t pressedThisFrame) {
                 return 1;
             blit(debris, 180 - debrisPosition, 72, 16, 7, BLIT_2BPP);
             if (debrisPosition == 142)
+              {
+                sfx_crash();
+                sfx_fire_enable();
                 openingState = 2;
+              }
             break;
             case 2:
                 *DRAW_COLORS = 0x4320;
@@ -160,9 +166,12 @@ uint8_t play_opening(uint8_t pressedThisFrame) {
                     break;
                 case 2: text("Christmas is ruined!", 2, 150);
                     break;
-                case 3: text("Wait! Is that-", 8, 150);
+                case 3:
+                  text("Wait! Is that-", 8, 150);
+                  sfx_fire_disable();
                     break;
                 default: openingState = 3;
+                  sfx_win();
                     break;
                 }
                 if(pressedThisFrame & BUTTON_1)
