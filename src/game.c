@@ -7,6 +7,7 @@
 #include "tilecollider.h"
 #include <stdbool.h>
 #include "music.h"
+#include "score.h"
 
 #define MAX_SPEED 0.5f
 #define WALK_SPEED 0.1f
@@ -17,8 +18,8 @@
 #define PEDDLE_SPEED 0.002f
 #define AIR_SPEED 0.001f
 
-unsigned short camXDeadZone = 50;
-unsigned short camYDeadZone = 50;
+unsigned short camXDeadZone = 0;
+unsigned short camYDeadZone = 0;
 
 struct vec playerPos;
 struct vec camPos;
@@ -34,8 +35,6 @@ unsigned char framesSinceGift = 0;
 bool giftUp = true;
 
 uint8_t frameCounter = 0;
-unsigned int timeCounter = 0;
-unsigned int giftCounter = 0;
 
 // Is the block of this state solid?
 bool solidp(char state)
@@ -210,7 +209,7 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
         playerVel.y += 0.6f;
       }
     
-    if (solidp(topLeftState) || solidp(topRightState))
+    else if (solidp(topLeftState) || solidp(topRightState))
       {
         newPlayerY = (int)newPlayerY + 1;
         playerVel.y = 0;
@@ -224,20 +223,20 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
 
     if (bottomLeftState == '^' || bottomRightState == '^')
       {
-        playerVel.y -= 1.2f;
+        playerVel.y = -1.2f;
       }
     else if (bottomLeftState == '<' || bottomRightState == '<')
       {
-        playerVel.y -= 0.6f;
-        playerVel.x -= 0.6f;
+        playerVel.y = -0.6f;
+        playerVel.x = -0.6f;
       }
     else if (bottomLeftState == '>' || bottomRightState == '>')
       {
-        playerVel.y -= 0.6f;
-        playerVel.x += 0.6f;
+        playerVel.y = -0.6f;
+        playerVel.x = 0.6f;
       }
 
-    if (solidp(bottomLeftState) || solidp(bottomRightState))
+    else if (solidp(bottomLeftState) || solidp(bottomRightState))
       {
         newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = 0;
@@ -361,7 +360,7 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
   } else
     frameCounter++;
 
-  if (timeCounter > 700)
+  if (timeCounter > 120)
     *DRAW_COLORS = 0x32;
   text(intToString(timeCounter, str), 0, 0);
 

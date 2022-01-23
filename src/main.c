@@ -21,7 +21,7 @@ void update () {
         break;
     case 1: gameState = game_update(gamepad_getPressedThisFrame(), gamepad_getPressed());
         break;
-    case 2: gameState = play_ending(gamepad_getPressedThisFrame(), gamepad_getPressed());
+    case 2: gameState = play_ending(gamepad_getPressedThisFrame());
         break;
     default:
         *DRAW_COLORS = 0x2;
