@@ -33,6 +33,12 @@ unsigned char framesSinceSpin = 0;
 unsigned char framesSinceGift = 0;
 bool giftUp = true;
 
+// Is the block of this state solid?
+bool solidp(char state)
+{
+  return state == '^' || state == '<' || state == '>' || state == '#' || state == 'v';
+}
+
 void drawTileStates()
 {
   for (size_t x = 0; x < LevelOneCollisionMap.width; ++x) {
@@ -41,20 +47,20 @@ void drawTileStates()
       char tileState = tc_getState(LevelOneCollisionMap, x, y);
       struct rect rct = tc_getRect(LevelOneCollisionMap, (struct tc_coord){ x, y });
       switch (tileState) {
-        case '#': blit(Block, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
-          break;
-        case '^': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
-          break;
-        case '>': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
-          break;
-        case 'v': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_Y);
-          break;
-        case '<': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_X);
-          break;
-        case 'G': blit(Gift, rct.x - camPos.x, rct.y - camPos.y + (giftUp ? 0 : 2), 16, 16, BLIT_2BPP);
-          break;
-        case 'W': blit(Mailbox, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
-          break;
+      case '#': blit(Block, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        break;
+      case '^': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        break;
+      case '>': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        break;
+      case 'v': blit(VerticalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_Y);
+        break;
+      case '<': blit(HorizontalJumpBlock, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_X);
+        break;
+      case 'G': blit(Gift, rct.x - camPos.x, rct.y - camPos.y + (giftUp ? 0 : 2), 16, 16, BLIT_2BPP);
+        break;
+      case 'W': blit(Mailbox, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+        break;
       }
     }
   }
@@ -175,7 +181,7 @@ void game_update()
   {
     char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y);
     char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y + (0.9f * currentPlayerHeight));
-    if (bottomLeftState == '#' || topLeftState == '#')
+    if (solidp(bottomLeftState) || solidp(topLeftState))
       {
         newPlayerX = (int)newPlayerX + 1;
         playerVel.x = 0;
@@ -186,7 +192,7 @@ void game_update()
   {
     char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y);
     char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y + (0.9f * currentPlayerHeight));
-    if (bottomRightState == '#' || topRightState == '#')
+    if (solidp(bottomRightState) || solidp(topRightState))
       {
         newPlayerX = (int)newPlayerX + (1.0f - currentPlayerWidth);
         playerVel.x = 0;
@@ -203,7 +209,8 @@ void game_update()
       {
         playerVel.y += 0.6f;
       }
-    else if (topLeftState == '#' || topRightState == '#')
+    
+    if (solidp(topLeftState) || solidp(topRightState))
       {
         newPlayerY = (int)newPlayerY + 1;
         playerVel.y = 0;
@@ -221,15 +228,16 @@ void game_update()
       }
     else if (bottomLeftState == '<' || bottomRightState == '<')
       {
-            playerVel.y -= 0.6f;
-            playerVel.x -= 0.6f;
+        playerVel.y -= 0.6f;
+        playerVel.x -= 0.6f;
       }
     else if (bottomLeftState == '>' || bottomRightState == '>')
       {
-            playerVel.y -= 0.6f;
-            playerVel.x += 0.6f;
+        playerVel.y -= 0.6f;
+        playerVel.x += 0.6f;
       }
-    else if (bottomLeftState == '#' || bottomRightState == '#')
+
+    if (solidp(bottomLeftState) || solidp(bottomRightState))
       {
         newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = 0;
