@@ -1,46 +1,24 @@
 #include "types.h"
 
+{{#levels}}
 const struct tc_context {{name}}CollisionMap = {
   .map =
-{{#collisionData.map}}    "{{.}}"
-{{/collisionData.map}},
-  .width = {{collisionData.width}},
-  .height = {{collisionData.height}},
-  .tileWidth = {{collisionData.tileSize}},
-  .tileHeight = {{collisionData.tileSize}}
+{{#map}}    "{{{.}}}"
+{{/map}},
+  .width = {{width}},
+  .height = {{height}},
+  .tileWidth = {{tileSize}},
+  .tileHeight = {{tileSize}}
 };
 
-struct MapTile {{name}}Tiles[{{tileSize}}] = {
-    {{#tiles}}
-    {
-        .sprite = &{{sprite}},
-        .posX = {{x}},
-        .posY = {{y}},
-        .rotation = {{rotation}}
-    },
-    {{/tiles}}
+const struct vec {{name}}PlayerStart = {
+    .x = {{playerX}},
+    .y = {{playerY}}
 };
 
-struct MapTile {{name}}Decals[{{decalSize}}] = {
-    {{#decals}}
-    {
-        .sprite = &{{sprite}},
-        .posX = {{x}},
-        .posY = {{y}},
-        .rotation = {{rotation}}
-    },
-    {{/decals}}
+const struct vec {{name}}CamStart = {
+    .x = {{camX}},
+    .y = {{camY}}
 };
 
-struct Map {{name}} = {
-    .tiles = {{name}}Tiles,
-    .tileSize = {{tileSize}},
-    .decals = {{name}}Decals,
-    .decalSize = {{decalSize}},
-    .startX = {{playerX}},
-    .startY = {{playerY}},
-    .minX = {{minX}},
-    .maxX = {{maxX}},
-    .minY = {{minY}},
-    .maxY = {{maxY}}
-};
+{{/levels}}

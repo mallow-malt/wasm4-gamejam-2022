@@ -2,7 +2,7 @@
 #include <math.h>
 #include "game.h"
 #include "sprites.h"
-#include "LevelOne.h"
+#include "levels.h"
 #include "utils.h"
 #include "gamepad.h"
 #include "tilecollider.h"
@@ -24,44 +24,38 @@ struct vec playerPos;
 struct vec camPos;
 struct vec playerVel;
 
+// Used for player animation
+bool facingRight = true;
+bool wheelsRotated = true;
+unsigned char framesSinceSpin = 0;
+
+// Used for gift animation
+unsigned char framesSinceGift = 0;
+bool giftUp = true;
+
 void drawTileStates()
 {
   for (size_t x = 0; x < LevelOneCollisionMap.width; ++x) {
     for (size_t y = 0; y < LevelOneCollisionMap.height; ++y) {
-      uint8_t drawColors = 0;
+      *DRAW_COLORS = 0x4320;
       char tileState = tc_getState(LevelOneCollisionMap, x, y);
-      switch (tileState) {
-      case '.': {
-        drawColors = 1;
-        break;
-      }
-      case '#': {
-        drawColors = 2;
-        break;
-      }
-      case '^': {
-        drawColors = 0x13;
-        break;
-      }
-      case '>': {
-        drawColors = 0x34;
-        break;
-      }
-      case 'v': {
-        drawColors = 0x23;
-        break;
-      }
-      case '<': {
-        drawColors = 0x43;
-        break;
-      }
-      default:
-        drawColors = 4;
-        break;
-      }
-      *DRAW_COLORS = drawColors;
       struct rect rct = tc_getRect(LevelOneCollisionMap, (struct tc_coord){ x, y });
-      rect(rct.x - camPos.x, rct.y - camPos.y, rct.width, rct.height);
+      switch (tileState) {
+        case '#': blit(Block.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+          break;
+        case '^': blit(VerticalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+          break;
+        case '>': blit(HorizontalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+          break;
+        case 'v': blit(VerticalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_Y);
+          break;
+        case '<': blit(HorizontalJumpBlock.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP | BLIT_FLIP_X);
+          break;
+        case 'G': blit(Gift.sprite, rct.x - camPos.x, rct.y - camPos.y + (giftUp ? 0 : 2), 16, 16, BLIT_2BPP);
+          break;
+        case 'W': blit(Mailbox.sprite, rct.x - camPos.x, rct.y - camPos.y, 16, 16, BLIT_2BPP);
+          break;
+      }
     }
   }
 }
@@ -72,147 +66,11 @@ void game_start () {
   PALETTE[2] = 0x8b0000;
   PALETTE[3] = 0xadd8e6;
 
-  playerPos.x = LevelOne.minX / LevelOneCollisionMap.tileWidth + LevelOne.startX / LevelOneCollisionMap.tileWidth;
-  playerPos.y = LevelOne.minY / LevelOneCollisionMap.tileHeight + LevelOne.startY / LevelOneCollisionMap.tileHeight;
-  tracef("%f",playerPos.x);
-  camPos.x = LevelOne.minX;
-  camPos.y = LevelOne.minY;
+  *DRAW_COLORS = 0x4320;
+
+  playerPos = LevelOnePlayerStart;
+  camPos = LevelOneCamStart;
 }
-
-
-// void game_update () {
-//   // Gamepad
-//   gamepad_update();
-//   uint8_t pressedThisFrame = gamepad_getPressedThisFrame();
-//   uint8_t gamepad = gamepad_getPressed();
-
-//   if (gamepad & BUTTON_LEFT)
-//     {
-//       xVel = clampF(xVel - playerAcc, -maxPlayerSpeed, maxPlayerSpeed);
-//     }
-//   if (gamepad & BUTTON_RIGHT)
-//     {
-//       xVel = clampF(xVel + playerAcc, -maxPlayerSpeed, maxPlayerSpeed);
-//     }
-//   // if (gamepad & BUTTON_UP)
-//   //   {
-//   //     player.pos.y -= 0.5f;
-//   //     yVel = clampF(yVel + g, )
-//   //   }
-//   if (grounded && gamepad & BUTTON_DOWN)
-//     {
-//       if (xVel < 0) {
-//         xVel = clampF(xVel + playerAcc * 2, -maxPlayerSpeed, 0);
-//       } else if (xVel > 0) {
-//         xVel = clampF(xVel - playerAcc * 2, 0, maxPlayerSpeed);
-//       }
-//     }
-
-//   if (!grounded) {
-//     yVel = clampF(yVel += g, -1, 1);
-//   } else {
-//     yVel = 0;
-//     if (xVel < 0) {
-//       xVel = clampF(xVel + friction, -maxPlayerSpeed, 0);
-//     } else if (xVel > 0) {
-//       xVel = clampF(xVel - friction, 0, maxPlayerSpeed);
-//     }
-//   }
-
-//   player.pos.x += xVel;
-//   player.pos.y += yVel;
-
-//   signed short oldVal = 0;
-//   if (player.pos.x < 80 - camXDeadZone) {
-//     // Move Cam Left
-//     oldVal = camX;
-//     camX = clampSS(camX - (80 - camXDeadZone - player.pos.x), LevelOne.minX, LevelOne.maxX);
-//     if (oldVal != camX)
-//       player.pos.x = 80 - camXDeadZone;
-//   } else if (player.pos.x > 80 + camXDeadZone) {
-//     // Move Cam Right
-//     oldVal = camX;
-//     camX = clampSS(camX + (player.pos.x - (80 + camXDeadZone)), LevelOne.minX, LevelOne.maxX);
-//     if (oldVal != camX)
-//       player.pos.x = camXDeadZone + 80;
-//   }
-
-//   if (player.pos.y < 80 - camYDeadZone) {
-//     // Move Cam Up
-//     oldVal = camY;
-//     camY = clampSS(camY - (80 - camYDeadZone - player.pos.y), LevelOne.minY, LevelOne.maxY);
-//     if (oldVal != camY)
-//       player.pos.y = 80 - camYDeadZone;
-//   } else if (player.pos.y > 80 + camYDeadZone) {
-//     // Move Cam Down
-//     oldVal = camY;
-//     camY = clampSS(camY + (player.pos.y - (80 + camYDeadZone)), LevelOne.minY, LevelOne.maxY);
-//     if (oldVal != camY)
-//       player.pos.y = camYDeadZone + 80;
-//   }
-
-//   *DRAW_COLORS = 0x4321;
-
-//   bool currentlyOnGround = false;
-//   for (int i = 0; i < LevelOne.tileSize; i++) {
-    
-//     struct polygon collider = makeSquare();
-//     collider.pos.x = LevelOne.tiles[i].posX - camX - 1;
-//     collider.pos.y = LevelOne.tiles[i].posY - camY - 1;
-//     collider.scale = 17;
-//     // collide(&player, &collider);
-//     groundedProbe.pos.x = player.pos.x;
-//     groundedProbe.pos.y = player.pos.y + 12;
-//     leftProbe.pos.x = player.pos.x - 3;
-//     leftProbe.pos.y = player.pos.y + 7;
-//     rightProbe.pos.x = player.pos.x + 12;
-//     rightProbe.pos.y = player.pos.y + 7;
-//     if(overlapP(groundedProbe, collider)) {
-//       player.pos.y = collider.pos.y - 11;
-//       yVel = 0;
-//       currentlyOnGround = true;
-//     } else if (overlapP(leftProbe, collider)) {
-//       player.pos.x = collider.pos.x + 18;
-//       xVel = 0;
-//     }
-//     *DRAW_COLORS = 0x4321;
-//     blit(LevelOne.tiles[i].sprite->sprite, LevelOne.tiles[i].posX - camX, LevelOne.tiles[i].posY - camY, 16, 16, LevelOne.tiles[i].rotation);
-//     *DRAW_COLORS = 0x1203;
-//     drawPolygon(collider);
-//   }
-//   *DRAW_COLORS = 0x4321;
-
-//   // tracef("%f", xVel);
-
-  
-//   // for (int i = 0; i < LevelOne.tileSize; i++) {
-//   //   struct polygon collider = makeSquare();
-//   //   collider.pos.x = LevelOne.tiles[i].posX - camX;
-//   //   collider.pos.y = LevelOne.tiles[i].posY - camY;
-//   //   collider.scale = 16;
-    
-//   //   if (overlapP(groundedProbe, collider))
-//   //     currentlyOnGround = true;
-//   //   if(overlapP(leftProbe, collider) || overlapP(rightProbe, collider))
-//   //     xVel = 0;
-//   // }
-
-  
-
-//   for (int i = 0; i < LevelOne.decalSize; i++) {
-//     blit(LevelOne.decals[i].sprite->sprite, LevelOne.decals[i].posX - camX, LevelOne.decals[i].posY - camY, 16, 16, LevelOne.decals[i].rotation);
-//   }
-
-//   blit(PlayerFlatA.sprite, player.pos.x - 2, player.pos.y - 5, PlayerFlatA.width, PlayerFlatA.height, PlayerFlatA.flag);
-
-//   *DRAW_COLORS = 0x1203;
-//   // drawPolygon(player);
-//   drawPolygon(groundedProbe);
-//   drawPolygon(leftProbe);
-//   drawPolygon(rightProbe);
-
-//   // trace(overlapP(player, groundedProbe) ? "true" : "false");
-// }
 
 void game_update()
 {
@@ -403,12 +261,38 @@ void game_update()
   } 
 
   // Draw tiles
+  if(framesSinceGift == 60) {
+    giftUp = !giftUp;
+    framesSinceGift = 0;
+  } else {
+    framesSinceGift++;
+  }
+
   drawTileStates();
 
   // Draw player
-  *DRAW_COLORS = grounded ? 0x32 : 0x34;
-  rect((playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x,
-       (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y,
-       currentPlayerWidth*LevelOneCollisionMap.tileWidth,
-       currentPlayerHeight*LevelOneCollisionMap.tileHeight);
+  if(playerVel.x < 0)
+    facingRight = false;
+  if(playerVel.x > 0)
+    facingRight = true;
+
+  if (playerVel.x == 0)
+    framesSinceSpin = 0;
+  else if (framesSinceSpin == 15) {
+    wheelsRotated = !wheelsRotated;
+    framesSinceSpin = 0;
+  }
+  else
+    framesSinceSpin++;
+
+  if (grounded) {
+    blit(wheelsRotated ? PlayerFlatA.sprite : PlayerFlatB.sprite, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x - (facingRight ? 1 : 2), (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
+  } else {
+    blit(wheelsRotated ? PlayerTiltA.sprite : PlayerTiltB.sprite, (playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x, (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y, 16, 16, facingRight ? BLIT_2BPP : BLIT_2BPP | BLIT_FLIP_X);
+  }
+  // *DRAW_COLORS = 0x30;
+  // rect((playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x,
+  //      (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y,
+  //      currentPlayerWidth*LevelOneCollisionMap.tileWidth,
+  //      currentPlayerHeight*LevelOneCollisionMap.tileHeight);
 }

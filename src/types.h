@@ -10,26 +10,6 @@ struct Sprite {
    uint8_t   sprite[];
 };
 
-struct MapTile {
-    struct Sprite* sprite;
-    signed short posX;
-    signed short posY;
-    uint32_t rotation;
-};
-
-struct Map {
-    struct MapTile* tiles;
-    unsigned short tileSize;
-    struct MapTile* decals;
-    unsigned short decalSize;
-    float startX;
-    float startY;
-    signed short minX;
-    signed short maxX;
-    signed short minY;
-    signed short maxY;
-};
-
 struct tc_context
 {
   char* map;

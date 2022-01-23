@@ -1,69 +1,49 @@
 const Mustache = require('mustache')
 const fs = require('fs')
 
-const parseTile = (tile, sprites, xOffset, yOffset) => {
-    let rotation
-    switch (tile.f) {
-        case 1: rotation = "BLIT_2BPP | BLIT_FLIP_X"
-            break
-        case 2: rotation = "BLIT_2BPP | BLIT_FLIP_Y"
-            break
-        case 3: rotation = "BLIT_2BPP | BLIT_FLIP_Y | BLIT_FLIP_X"
-            break
-        default: rotation = "BLIT_2BPP"
-            break
+const getTileSymbol = (t, f) => {
+    switch (t) {
+        case 0: return '#'
+        case 1: if (f == 2) return 'v' 
+            return '^'
+        case 3: if (f == 1) return '<' 
+            return '>'
+        case 4: return 'G'
+        case 5: return 'W'
+        default:
+            break;
     }
-    return ({
-        sprite: sprites[tile.t],
-        x: tile.px[0] - xOffset,
-        y: tile.px[1] - yOffset,
-        rotation
-    })
 }
 
 fs.readFile('./maps.ldtk', 'utf8', (_, rawData) => {
     const mapData = JSON.parse(rawData)
-    mapData.levels.forEach(level => {
-        let [xOffset, yOffset] = level.layerInstances.find(layer => layer.__identifier == "Camera").gridTiles[0].px
+    const parsedData = mapData.levels.map(level => {
+        let cameraPos = level.layerInstances.find(layer => layer.__identifier == "Camera").gridTiles[0].px
         let playerPos = level.layerInstances.find(layer => layer.__identifier == "Player").gridTiles[0].px
-        let decals = level.layerInstances.find(layer => layer.__identifier == "Decals").gridTiles.map(tile => {
-            return parseTile(tile, ["FullBlockColorA", "HalfBlockColorA"], xOffset, yOffset)
-        })
         let tilesLayer = level.layerInstances.find(layer => layer.__identifier == "Tiles")
-        let tiles = tilesLayer.gridTiles.map(tile => {
-            return parseTile(tile, ["FullBlockColorA", "HalfBlockColorA"], xOffset, yOffset)
-        })
         let map = ".".repeat(tilesLayer.__cWid * tilesLayer.__cHei).split('')
         tilesLayer.gridTiles.forEach(tile => {
             let [tileX, tileY] = tile.px
             tileX /= 16
             tileY /= 16
-            map[tileY * tilesLayer.__cWid + tileX] = "#"
+            map[tileY * tilesLayer.__cWid + tileX] = getTileSymbol(tile.t, tile.f)
         })
-        const splitter = new RegExp(`.{1,${tilesLayer.__cWid}}`, "g")
-        let data = {
+        return {
             name: level.identifier,
-            decals,
-            decalSize: decals.length,
-            tiles,
-            tileSize: tiles.length,
-            playerX: playerPos[0] - xOffset,
-            playerY: playerPos[1] - yOffset,
-            minX: -xOffset,
-            maxX: level.pxWid - xOffset - 160,
-            minY: -yOffset,
-            maxY: level.pxHei - yOffset - 160,
-            collisionData: {
-                width: tilesLayer.__cWid,
-                height: tilesLayer.__cHei,
-                tileSize: tilesLayer.__gridSize,
-                map: map.join('').match(splitter)
-            }
+            camX: cameraPos[0],
+            camY: cameraPos[1],
+            playerX: playerPos[0] / tilesLayer.__gridSize,
+            playerY: playerPos[1] / tilesLayer.__gridSize,
+            width: tilesLayer.__cWid,
+            height: tilesLayer.__cHei,
+            tileSize: tilesLayer.__gridSize,
+            map: map.join('').match(new RegExp(`.{1,${tilesLayer.__cWid}}`, "g"))
         }
-        fs.readFile('./template.mustache', 'utf8', (_, template) => {
-            fs.writeFile(`${data.name}.h`, Mustache.render(template, data), _ => {
-                console.log('done')
-            })
+    })
+
+    fs.readFile('./template.mustache', 'utf8', (_, template) => {
+        fs.writeFile(`levels.h`, Mustache.render(template, { levels: parsedData }), _ => {
+            console.log('done')
         })
     })
 })
