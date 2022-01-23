@@ -245,6 +245,54 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
       }
   }
 
+
+  // Soft collisions
+  {
+    struct vec topLeftPos = {
+      newPlayerX + (0.1f * currentPlayerWidth),
+      newPlayerY + (0.1f * currentPlayerHeight)};
+    struct vec bottomLeftPos = {
+      newPlayerX + (0.1f * currentPlayerWidth),
+      newPlayerY + (0.9f * currentPlayerHeight)};
+    struct vec topRightPos = {
+      newPlayerX + (0.9f * currentPlayerWidth),
+      newPlayerY + (0.1f * currentPlayerHeight)};
+    struct vec bottomRightPos = {
+      newPlayerX + (0.9f * currentPlayerWidth),
+      newPlayerY + (0.9f * currentPlayerHeight)};
+    
+    char topLeftState = tc_getState(LevelOneCollisionMap, topLeftPos.x, topLeftPos.y);
+    char bottomLeftState = tc_getState(LevelOneCollisionMap, bottomLeftPos.x, bottomLeftPos.y);
+    char topRightState = tc_getState(LevelOneCollisionMap, topRightPos.x, topRightPos.y);
+    char bottomRightState = tc_getState(LevelOneCollisionMap, bottomRightPos.x, bottomRightPos.y);
+
+    if (topLeftState == 'G')
+      {
+        tc_setState(LevelOneCollisionMap, topLeftPos.x, topLeftPos.y, '.');
+        giftCounter++;
+      }
+    else if (bottomLeftState == 'G')
+      {
+        tc_setState(LevelOneCollisionMap, bottomLeftPos.x, bottomLeftPos.y, '.');
+        giftCounter++;
+      }
+    else if (topRightState == 'G')
+      {
+        tc_setState(LevelOneCollisionMap, topRightPos.x, topRightPos.y, '.');
+        giftCounter++;
+      }
+    else if (bottomRightState == 'G')
+      {
+        tc_setState(LevelOneCollisionMap, bottomRightPos.x, bottomRightPos.y, '.');
+        giftCounter++;
+      }
+
+    if (topLeftState == 'W' || bottomLeftState == 'W' || topRightState == 'W' || bottomRightState == 'W')
+      {
+        return 2;
+      }
+  }  
+
   
 
   // Apply new position

@@ -12,6 +12,15 @@ char tc_getState(struct tc_context context, size_t x, size_t y)
   return context.map[x + y*context.width];
 }
 
+void tc_setState(struct tc_context context, size_t x, size_t y, char newState)
+{
+  if (x < 0 || x >= context.width || y < 0 || y >= context.height)
+    {
+      return;
+    }
+  context.map[x + y*context.width] = newState;
+}
+
 struct rect tc_getRect(struct tc_context context, struct tc_coord coords)
 {
   struct rect res = {

@@ -7,6 +7,7 @@
 #define TC_NULLSTATE ' '
 
 char tc_getState(struct tc_context context, size_t x, size_t y);
+void tc_setState(struct tc_context context, size_t x, size_t y, char newState);
 struct rect tc_getRect(struct tc_context context, struct tc_coord coords);
 struct tc_coord tc_posToCoord(struct tc_context context, struct vec pos);
 char tc_getStateAtPos(struct tc_context context, struct vec pos);
