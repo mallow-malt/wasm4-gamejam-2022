@@ -6,10 +6,16 @@
 #include "utils.h"
 #include "gamepad.h"
 #include "tilecollider.h"
+#include <stdbool.h>
 
 #define MAX_SPEED 0.5f
 #define WALK_SPEED 0.1f
-#define PLAYER_SIZE 1.0f
+#define PLAYER_UPRIGHT_WIDTH 13.0f/16.0f
+#define PLAYER_UPRIGHT_HEIGHT 16.0f/16.0f
+#define PLAYER_TILTED_WIDTH 15.0f/16.0f
+#define PLAYER_TILTED_HEIGHT 15.0f/16.0f
+#define PEDDLE_SPEED 0.002f
+#define AIR_SPEED 0.02f
 
 unsigned short camXDeadZone = 50;
 unsigned short camYDeadZone = 50;
@@ -204,12 +210,6 @@ void game_update()
   uint8_t gamepad = gamepad_getPressed();
 
 
-  // Jump
-  if (pressedThisFrame & BUTTON_1) {
-    playerVel.y += -0.5f;
-  }
-
-
   // Gravity
   playerVel.y += 0.03f;
   
@@ -228,67 +228,124 @@ void game_update()
     playerVel.y = -MAX_SPEED;
 
 
+  // Store current player size
+  float currentPlayerWidth = PLAYER_UPRIGHT_WIDTH;
+  float currentPlayerHeight = PLAYER_UPRIGHT_HEIGHT;
+
+  
+
+  // Get grounded status
+  bool grounded =
+    tc_getState(LevelOneCollisionMap,
+                playerPos.x,
+                playerPos.y + currentPlayerHeight + (1.0f/16.0f)) == '#' ||
+    tc_getState(LevelOneCollisionMap,
+                playerPos.x + currentPlayerWidth,
+                playerPos.y + currentPlayerHeight + (1.0f/16.0f)) == '#';
+
+
+  // Jump
+  if (grounded)
+    {
+      if (pressedThisFrame & BUTTON_UP) {
+        playerVel.y += -0.5f;
+      }
+    }
+
+
+
+  // Peddling
+  if (grounded)
+    {
+      if (gamepad & BUTTON_LEFT) // peddle left
+        {
+          playerVel.x -= PEDDLE_SPEED;
+        }
+      else if (gamepad & BUTTON_RIGHT) // peddle right
+        {
+          playerVel.x += PEDDLE_SPEED;
+        }
+      else if (gamepad & BUTTON_DOWN) // break
+        {
+          playerVel.x += (PEDDLE_SPEED*3) * (playerVel.x > 0 ? -1 : 1);
+          playerVel.x = (fabs(playerVel.x) <= PEDDLE_SPEED*3) ? 0 : playerVel.x;
+        }
+      else // release peddle
+        {
+          playerVel.x += (PEDDLE_SPEED) * (playerVel.x > 0 ? -1 : 1);
+          playerVel.x = (fabs(playerVel.x) <= PEDDLE_SPEED) ? 0 : playerVel.x;
+        }
+    }
+
+
+  
+  // Air control
+  if (!grounded)
+    {
+      if (gamepad & BUTTON_LEFT) // left
+        {
+          playerPos.x -= AIR_SPEED;
+        }
+      else if (gamepad & BUTTON_RIGHT) // right
+        {
+          playerPos.x += AIR_SPEED;
+        }
+    }
+
+  
+
   // Calc next position
   float newPlayerX = playerPos.x + playerVel.x;
   float newPlayerY = playerPos.y + playerVel.y;
 
 
-
-  if (gamepad & BUTTON_LEFT)
-    {
-      newPlayerX += -WALK_SPEED;
-    }
-  if (gamepad & BUTTON_RIGHT)
-    {
-      newPlayerX += WALK_SPEED;
-    }
-
+  
 
   // Collisions
   if (newPlayerX - playerPos.x < 0) // going left
-    {
-      char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y);
-      char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y + (0.9f * PLAYER_SIZE));
-      if (bottomLeftState != '.' || topLeftState != '.')
-        {
-          newPlayerX = (int)newPlayerX + 1;
-          playerVel.x = 0;
-        }
-    }
+  {
+    char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y);
+    char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, playerPos.y + (0.9f * currentPlayerHeight));
+    if (bottomLeftState != '.' || topLeftState != '.')
+      {
+        newPlayerX = (int)newPlayerX + 1;
+        playerVel.x = 0;
+      }
+  }
 
   if (newPlayerX - playerPos.x > 0) // going right
-    {
-      char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + PLAYER_SIZE, playerPos.y);
-      char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + PLAYER_SIZE, playerPos.y + (0.9f * PLAYER_SIZE));
-      if (bottomRightState != '.' || topRightState != '.')
-        {
-          newPlayerX = (int)newPlayerX + (1.0f - PLAYER_SIZE);
-          playerVel.x = 0;
-        }
-    }
+  {
+    char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y);
+    char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + currentPlayerWidth, playerPos.y + (0.9f * currentPlayerHeight));
+    if (bottomRightState != '.' || topRightState != '.')
+      {
+        newPlayerX = (int)newPlayerX + (1.0f - currentPlayerWidth);
+        playerVel.x = 0;
+      }
+  }
 
   if (newPlayerY - playerPos.y < 0) // going up
-    {
-      char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY);
-      char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * PLAYER_SIZE), newPlayerY);
-      if (topLeftState != '.' || topRightState != '.')
-        {
-          newPlayerY = (int)newPlayerY + 1;
-          playerVel.y = 0;
-        }
-    }
+  {
+    char topLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY);
+    char topRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * currentPlayerWidth), newPlayerY);
+    if (topLeftState != '.' || topRightState != '.')
+      {
+        newPlayerY = (int)newPlayerY + 1;
+        playerVel.y = 0;
+      }
+  }
 
   if (newPlayerY - playerPos.y > 0) // going down
-    {
-      char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY + PLAYER_SIZE);
-      char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * PLAYER_SIZE), newPlayerY + PLAYER_SIZE);
-      if (bottomLeftState != '.' || bottomRightState != '.')
-        {
-          newPlayerY = (int)newPlayerY + (1.0f - PLAYER_SIZE);
-          playerVel.y = 0;
-          // on ground
-        }
-    }
+  {
+    char bottomLeftState = tc_getState(LevelOneCollisionMap, newPlayerX, newPlayerY + currentPlayerHeight);
+    char bottomRightState = tc_getState(LevelOneCollisionMap, newPlayerX + (0.9f * currentPlayerWidth), newPlayerY + currentPlayerHeight);
+    if (bottomLeftState != '.' || bottomRightState != '.')
+      {
+        newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
+        playerVel.y = 0;
+        // on ground
+      }
+  }
 
 
   // Apply new position
@@ -316,9 +373,9 @@ void game_update()
   drawTileStates();
 
   // Draw player
-  *DRAW_COLORS = 0x32;
+  *DRAW_COLORS = grounded ? 0x32 : 0x34;
   rect((playerPos.x*LevelOneCollisionMap.tileWidth) - camPos.x,
        (playerPos.y*LevelOneCollisionMap.tileHeight) - camPos.y,
-       PLAYER_SIZE*LevelOneCollisionMap.tileWidth,
-       PLAYER_SIZE*LevelOneCollisionMap.tileHeight);
+       currentPlayerWidth*LevelOneCollisionMap.tileWidth,
+       currentPlayerHeight*LevelOneCollisionMap.tileHeight);
 }
