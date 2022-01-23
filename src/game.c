@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "tilecollider.h"
 #include <stdbool.h>
+#include "music.h"
 
 #define MAX_SPEED 0.5f
 #define WALK_SPEED 0.1f
@@ -79,6 +80,8 @@ void game_start () {
 
 uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
 {
+  music_update();
+  
   // Gravity
   playerVel.y += 0.03f;
   

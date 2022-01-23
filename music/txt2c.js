@@ -172,9 +172,9 @@ const src = [];
         src.push(`.noteCount = ${pattern.notes.length},`);        
         src.push(".notes = (struct note[]){");
         for(let note of pattern.notes) {
-          const midi = np.parse(note.Value).midi;
+          const freq = Math.round(np.parse(note.Value).freq);
           const instreID = instrumentIDs[note.Instrument];
-          src.push(`{ .time = ${note.Time}, .value = ${midi}, .duration = ${note.Duration}, .instrument = ${instreID} },`);
+          src.push(`{ .time = ${note.Time}, .value = ${freq}, .duration = ${note.Duration}, .instrument = ${instreID} },`);
         }
         src.push("}");
         

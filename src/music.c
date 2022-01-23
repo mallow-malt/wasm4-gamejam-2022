@@ -4,6 +4,7 @@
 
 int currentPattern = 0;
 int patternProgress = 0;
+bool paused = false;
 
 int ResolveChannel(enum channelType tp)
 {
@@ -25,14 +26,36 @@ int ResolveChannel(enum channelType tp)
   }
 }
 
+void music_pause()
+{
+  paused = true;
+}
+
+void music_play()
+{
+  paused = false;
+}
+
+void music_stop()
+{
+  paused = true;
+  currentPattern = 0;
+  patternProgress = 0;
+}
+
 void music_update()
 {
+  if (paused)
+    {
+      return;
+    }
+  
   struct song song = proj.songs[0];
   int patternFrames = song.patternLength * song.noteLength;
 
   for (int i = 0; i < song.channelCount; ++i) {
     struct channel channel = song.channels[i];
-    for (int j = 0; j < channel.patternInstanceCount; ++i) {
+    for (int j = 0; j < channel.patternInstanceCount; ++j) {
       struct patternInstance patInst = channel.patternInstances[j];
       if (patInst.time == currentPattern)
         {
