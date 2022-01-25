@@ -206,6 +206,7 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
 
     if (topLeftState == 'v' || topRightState == 'v')
       {
+        newPlayerY = (int)newPlayerY + 1;
         playerVel.y += 0.6f;
       }
     
@@ -223,15 +224,18 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
 
     if (bottomLeftState == '^' || bottomRightState == '^')
       {
+        newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = -1.2f;
       }
     else if (bottomLeftState == '<' || bottomRightState == '<')
       {
+        newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = -0.6f;
         playerVel.x = -0.6f;
       }
     else if (bottomLeftState == '>' || bottomRightState == '>')
       {
+        newPlayerY = (int)newPlayerY + (1.0f - currentPlayerHeight);
         playerVel.y = -0.5f;
         playerVel.x = 0.6f;
       }
