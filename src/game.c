@@ -16,7 +16,7 @@
 #define PLAYER_TILTED_WIDTH 15.0f/16.0f
 #define PLAYER_TILTED_HEIGHT 15.0f/16.0f
 #define PEDDLE_SPEED 0.002f
-#define AIR_SPEED 0.001f
+#define AIR_SPEED 0.01f
 
 unsigned short camXDeadZone = 0;
 unsigned short camYDeadZone = 0;
@@ -232,7 +232,7 @@ uint8_t game_update(uint8_t pressedThisFrame, uint8_t gamepad)
       }
     else if (bottomLeftState == '>' || bottomRightState == '>')
       {
-        playerVel.y = -0.6f;
+        playerVel.y = -0.5f;
         playerVel.x = 0.6f;
       }
 
